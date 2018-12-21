@@ -7,13 +7,10 @@ source('C:/R/drones/header.R')
 
 {
 # параллельный процесс
-cl <- parallel::makeCluster(4)
-doParallel::registerDoParallel(cl)
-clusterEvalQ(cl, library("retistruct"))
-parallel::stopCluster(cl)
-
-buildingInfo <<- data.frame(fiF = array(NA, N), fiS = array(NA, N), x1 = array(NA, N), y1 = array(NA, N),
-                            x2 = array(NA, N), y2 = array(NA, N), H = H)
+# cl <- parallel::makeCluster(4)
+# doParallel::registerDoParallel(cl)
+# clusterEvalQ(cl, library("retistruct"))
+# parallel::stopCluster(cl)
 
 {  
   # # ‘ункци€ дл€ установки N зданий ручками
@@ -43,10 +40,10 @@ buildingInfo <<- data.frame(fiF = array(NA, N), fiS = array(NA, N), x1 = array(N
   # функци€ дл€ автоматического формировани€ зданий дл€ заданной плотности
   PointsForBuilding <- function(N) {
     mass <- data.frame(x1 = array(NA, N), y1 = array(NA, N), x2 = array(NA, N), y2 = array(NA, N))
-    # надо доделать окно
-    coreOfCoordinates <- rpoispp(L, 200, win = owin(c(0,40), c(0,40)))
+    # надо доделать окно 
+    coreOfCoordinates <- rpoispp(lmbd, 200, win = owin(c(0,40), c(0,40)))
     foreach(i = 1:N) %do% {
-      
+      l <- runif(1, 0, L/2)
     }
   }
   # »нициализаци€ матрицы с информацией о здани€х с высотой: {fi1, fi2, x1, y1, x2, y2, H}. 
@@ -136,7 +133,10 @@ buildingInfo <<- data.frame(fiF = array(NA, N), fiS = array(NA, N), x1 = array(N
   # pConnect - веро€тность los
   # NumberOfIteration - количество итераций
   # R - дальность действи€ передатчика
+  # lmbd - плотность распределени€ дл€ зданий
+  # L - длина зданий
   
+  L <<- 10
   R <<- 35
   NumberOfIteration <- 50
   APPoint <<- data.frame(x = 20, y = 20)
@@ -144,7 +144,7 @@ buildingInfo <<- data.frame(fiF = array(NA, N), fiS = array(NA, N), x1 = array(N
   N <<- 3
   n <<- 100
   # не глобал, но определ€ет минимальную и максимальную высоту передатчика
-  HTxMin <- 12
+  HTxMin <- 30
   HTxMax <- 30
   gridSize <<- data.frame(x = 40, y = 40)
   coordinatesForUP <<- data.frame(x = runif(n, 0, gridSize$x), y = runif(n, 0, gridSize$y),
@@ -170,10 +170,12 @@ buildingInfo <<- data.frame(fiF = array(NA, N), fiS = array(NA, N), x1 = array(N
 
 
 for (k in 1:NumberOfIteration) {
+  # распределение дл€ зданий 
+  lmbd <<- k*10^-3
   coordinatesForUP <<- coordinatesForUPCache
   # coordinatesForUP[,"x"] <- runif(n, 0, gridSize$x)
   # coordinatesForUP[,"y"] <- runif(n, 0, gridSize$y)
-  HTx <<- seq(HTxMin, HTxMax, (HTxMax - HTxMin) / (NumberOfIteration - 1))
+  HTx <<- array(HTx, dim = NumberOfIteration)
   # main
   # инициаци€ постройки зданий с общей информацией 
   PointsForBuilding(N)
