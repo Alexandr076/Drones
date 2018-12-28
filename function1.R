@@ -65,25 +65,30 @@ VerificationUP <- function(n, N, APPoint, coordinatesForUP, buildingInfo) {
                                         c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
                                           lonlat = FALSE)
   
-  if (typeof(coordinates) != "logical") { 
-    if (coordinatesForUP$l2[n] == NA) {
-      # координаты точки пересечения и просчет длин l, l1, l2, проставление флага
-      coordinatesForUP$flag[n] <- "TRUE"
-      coordinatesForUP$xInter[n] <- coordinates[1]
-      coordinatesForUP$yInter[n] <- coordinates[2]
-      l2 <- pointDistance(c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]), 
+  if (typeof(coordinates) != "logical") {
+    # координаты точки пересечения и просчет длин l, l1, l2, проставление флага
+    coordinatesForUP$flag[n] <- "TRUE"
+    coordinatesForUP$xInter[n] <- coordinates[1]
+    coordinatesForUP$yInter[n] <- coordinates[2]
+    l2 <- pointDistance(c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]), 
                                     c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
-                                        lonlat = FALSE)
+                                        lonlat = FALSE) 
+    if (coordinatesForUP$l2[n] != NA) {
+      
+      
       if (l2 < coordinatesForUP$l2[n]) {
-      coordinatesForUP$l1[n] <- pointDistance(c(APPoint$x,APPoint$y), 
-                                               c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]),
-                                               lonlat = FALSE)
-      coordinatesForUP$l2[n] <- pointDistance(c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]), 
-                                               c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
-                                               lonlat = FALSE)
+        coordinatesForUP$l1[n] <- pointDistance(c(APPoint$x,APPoint$y), 
+                                                 c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]),
+                                                 lonlat = FALSE)
+        coordinatesForUP$l2[n] <- l2
+        }
       }
-    }
+      else {
+
+      }
+    
   }
+  return (coordinatesForUP)
 }
 
 # функция для проверки LOS без учета максимального действия AP

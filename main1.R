@@ -72,7 +72,7 @@ for (k in 1:NumberOfIteration) {
 	buildingInfo <- PointsForBuilding(lmbd, Lmin, Lmax, buildingInfo, BuildNumber, coreOfCoordinates)
 	foreach(i = 1:n) %do% {
 	  foreach(j = 1:BuildNumber) %do% {
-	    VerificationUP(i, j, APPoint, coordinatesForUP, buildingInfo)
+	    coordinatesForUP <- VerificationUP(i, j, APPoint, coordinatesForUP, buildingInfo)
 	  }
 	}
 
