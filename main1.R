@@ -33,6 +33,9 @@ source('C:/R/drones/header.R')
 # D - расстояние между Tx и Rx в плоскости XoY
 
 
+HTx <- 20
+
+
 Lmin <- 15
 Lmax <- 15
 R <- 35
@@ -43,28 +46,42 @@ n <- 100
 HTxMin <- 30
 HTxMax <- 30
 gridSize <- data.frame(x = 40, y = 40)
+
 coordinatesForUP <- data.frame(x = runif(n, 0, gridSize$x), y = runif(n, 0, gridSize$y),
                                 H = runif(n, 0.01, 2), flag = array(FALSE, n), xInter = array(NA, n),
                                 yInter = array(NA, n), l = array(NA, n), l1 = array(NA, n), l2 = array(NA, n))
 lmbd <- 10^-3
-coreOfCoordinates <- rpoispp(lmbd, win = owin(c(0,40), c(0,40)))
-BuildNumber <- coreOfCoordinates$n
+
+while (TRUE) {
+	coreOfCoordinates <- rpoispp(lmbd, win = owin(c(0,40), c(0,40)))
+	BuildNumber <- coreOfCoordinates$n
+	if (BuildNumber > 1) {break}
+}
+
 buildingInfo <- data.frame(x1 = array(NA, BuildNumber), y1 = array(NA, BuildNumber), x2 = array(NA, BuildNumber), 
                             y2 = array(NA, BuildNumber), H = HBuild, L = array(NA, BuildNumber), angle = array(NA, BuildNumber))
 pDisconnect <- array(NA, NumberOfIteration)
 pConnect <- array(NA, NumberOfIteration)
+
 
 # основная программа
 for (k in 1:NumberOfIteration) {
 	lmbd <- k * 10^-3
 	HTx <- array(HTx, dim = NumberOfIteration)
 	# инициация постройки зданий с общей информацией
-	PointsForBuilding(lmbd, Lmin, Lmax, buildingInfo, BuildNumber)
+	buildingInfo <- PointsForBuilding(lmbd, Lmin, Lmax, buildingInfo, BuildNumber, coreOfCoordinates)
 	foreach(i = 1:n) %do% {
 	  foreach(j = 1:BuildNumber) %do% {
-	    VerificationUP(i, j)
+	    VerificationUP(i, j, APPoint, coordinatesForUP, buildingInfo)
 	  }
 	}
+
+
+
+
+
+
+
 	# координаты для UP с флагом true
 	# coordinatesForUPWithTrueFlag <- coordinatesForUP[coordinatesForUP[,"flag"] == TRUE,]
 	# для каждой заблокированной точки вычисляем H и усправляем флаг, если нужно
@@ -101,5 +118,4 @@ for (k in 1:NumberOfIteration) {
 #        coordinatesForUP$y[9], pch = 19, col = "red")
 # points(coordinatesForUP$x[1], coordinatesForUP$y[1], col = 'green', pch = 19)
 # points(coordinatesForUP$x[15], coordinatesForUP$y[15], col = 'red', pch = 19)
-
 

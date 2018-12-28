@@ -1,9 +1,9 @@
 # функция для автоматического формирования зданий для заданной плотности
-PointsForBuilding <- function(lmbd, Lmin, Lmax, mass, BuildNumber) {
+PointsForBuilding <- function(lmbd, Lmin, Lmax, mass, BuildNumber, coreOfCoordinates) {
   foreach(i = 1:BuildNumber) %do% {
     mass$L[i] <- runif(1, Lmin/2, Lmax/2)
     mass$angle[i] <- runif(1, 0, 2*pi)
-    if (mass$angle[i] > pi/2) && (mass$angle[i] < pi) {
+    if ( (mass$angle[i] > pi/2) && (mass$angle[i] < pi) ) {
       mass$x1[i] = coreOfCoordinates$x[i] - (mass$L[i] * cos(pi - mass$angle[i]))
       mass$y1[i] = coreOfCoordinates$y[i] + (mass$L[i] * sin(pi - mass$angle[i]))
       mass$x2[i] = coreOfCoordinates$x[i] + (mass$L[i] * cos(pi - mass$angle[i]))
@@ -28,6 +28,7 @@ PointsForBuilding <- function(lmbd, Lmin, Lmax, mass, BuildNumber) {
       mass$y2[i] = coreOfCoordinates$y[i] + (mass$L[i] * sin(mass$angle[i]))
     }
   }
+  return (mass)
 }
 
 # Инициализация матрицы с информацией о зданиях с высотой: {fi1, fi2, x1, y1, x2, y2, H}. 
@@ -50,28 +51,38 @@ BuildingCreator <- function(M, APPoint) {
 }
 
 
-# функция проверки, что точка лежит за пределами здания (проверка на fi). На вход подается номер UP 
+# функция проверки, что точка лежит за пределами здания. На вход подается номер UP 
 # точки и номер здания. Если пересечение между двумя прямыми, построенными между точками (AP,UP) и 
-# прямой здания существует, то записывается координата пересечения, иначе - false 
+# прямой здания существует, то записывается координата пересечения, иначе - false. Здесь l1 - расстояние
+# от AP до точки пересечения (Inter), l2 - от Inter до UP, l - общая длина от AP До UP
 
-VerificationUP <- function(n, N) {
+VerificationUP <- function(n, N, APPoint, coordinatesForUP, buildingInfo) {
   coordinates <- line.line.intersection(c(APPoint$x,APPoint$y), c(coordinatesForUP$x[n], 
-                                                                  coordinatesForUP$y[n]), c(buildingInfo$x1[N],buildingInfo$y1[N]),
+                                    coordinatesForUP$y[n]), c(buildingInfo$x1[N],buildingInfo$y1[N]),
                                         c(buildingInfo$x2[N],buildingInfo$y2[N]), interior.only = "true")
+  
   coordinatesForUP$l[n] <- pointDistance(c(APPoint$x,APPoint$y), 
-                                          c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
+                                        c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
                                           lonlat = FALSE)
+  
   if (typeof(coordinates) != "logical") { 
-    # координаты точки пересечения и просчет длин l, l1, l2, проставление флага
-    coordinatesForUP$flag[n] <- "TRUE"
-    coordinatesForUP$xInter[n] <- coordinates[1]
-    coordinatesForUP$yInter[n] <- coordinates[2]
-    coordinatesForUP$l1[n] <- pointDistance(c(APPoint$x,APPoint$y), 
-                                             c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]),
-                                             lonlat = FALSE)
-    coordinatesForUP$l2[n] <- pointDistance(c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]), 
-                                             c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
-                                             lonlat = FALSE)
+    if (coordinatesForUP$l2[n] == NA) {
+      # координаты точки пересечения и просчет длин l, l1, l2, проставление флага
+      coordinatesForUP$flag[n] <- "TRUE"
+      coordinatesForUP$xInter[n] <- coordinates[1]
+      coordinatesForUP$yInter[n] <- coordinates[2]
+      l2 <- pointDistance(c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]), 
+                                    c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
+                                        lonlat = FALSE)
+      if (l2 < coordinatesForUP$l2[n]) {
+      coordinatesForUP$l1[n] <- pointDistance(c(APPoint$x,APPoint$y), 
+                                               c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]),
+                                               lonlat = FALSE)
+      coordinatesForUP$l2[n] <- pointDistance(c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]), 
+                                               c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
+                                               lonlat = FALSE)
+      }
+    }
   }
 }
 
