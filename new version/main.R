@@ -33,14 +33,14 @@ source('C:/R/Drones/new version/functions.R')
 # D - расстояние между Tx и Rx в плоскости XoY
 
 
-HTx <- 50
+HTx <- 60
 Lmin <- 0
-Lmax <- 15
+Lmax <- 20
 R <- 100
 NumberOfIteration <- 8
 APPoint <- data.frame(x = 50, y = 50)
 HBuild <- 30 
-n <- 1000
+n <- 50
 HTxMin <- 30
 HTxMax <- 30
 gridSize <- data.frame(x = 100, y = 100)
@@ -56,9 +56,9 @@ pConnect <- array(NA, NumberOfIteration)
 
 
 # основная программа
-for (k in 1:NumberOfIteration) {
+for (k in 2:NumberOfIteration) {
   coordinatesForUP <- coordinatesForUPAtStart
-  lmbd <- k * 10^-3
+  lmbd <- k * 10^-4
 	while (TRUE) {
 	  coreOfCoordinates <- rpoispp(lmbd, win = owin(c(0,100), c(0,100)))
 	  BuildNumber <- coreOfCoordinates$n
@@ -93,16 +93,20 @@ for (k in 1:NumberOfIteration) {
 	pConnect[k] <- 1 - pDisconnect[k]
 }
   
-
+oX <- c(2:8)
+oX <- oX * 10^-4
+sm <- smooth.spline(oX, pConnect[2:8], spar = 0.35)
+plot(sm, type = 'l', ylab = "connection probability", xlab = "building density")
 
 plot(0,0,xlim = c(0,100), ylim = c(0,100), col = "white")
 for (i in 1:BuildNumber) {
   lines(x = c(buildingInfo$x1[i], buildingInfo$x2[i]), y = c(buildingInfo$y1[i], buildingInfo$y2[i]))
 }
-for (i in 1:100) {
+for (i in 1:n) {
   points(coordinatesForUP$x[coordinatesForUP[,"flag"] == TRUE],
          coordinatesForUP$y[coordinatesForUP[,"flag"] == TRUE], pch = 19, col = "red")
   points(coordinatesForUP$x[coordinatesForUP[,"flag"] == FALSE],
          coordinatesForUP$y[coordinatesForUP[,"flag"] == FALSE], pch = 19, col = "green")
+  points(APPoint$x, APPoint$y, pch = 19, col = "black")
 }
 
