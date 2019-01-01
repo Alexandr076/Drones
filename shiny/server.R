@@ -46,42 +46,40 @@ shinyServer(function(input, output) {
     # angle - угол в плоскости YoZ между Tx и Rx
     # D - расстояние между Tx и Rx в плоскости XoY
     
+
+    n <- react_n()
+    HTx <- react_HTx()
+    # HTx <- 50
+    Lmin <- 0
+    Lmax <- 20
+    R <- react_R()
+    # R <- 100
+    NumberOfIteration <- react_NumberOfIteraion()
+    # NumberOfIteration <- 12
+    APPoint <- data.frame(x = react_APPointX(), y = react_APPointY())
+    # APPoint <- data.frame(x = 50, y = 50)
+    HBuild <- react_HBuild()
+    # HBuild <- 30
+    HTxMin <- 30
+    HTxMax <- 30
+    gridSize <- data.frame(x = react_gridSizeX(), y = react_gridSizeY())
+    coordinatesForUP <- data.frame(x = runif(n, 0, gridSize$x), y = runif(n, 0, gridSize$y),
+                                   H = array(2, n), flag = array(FALSE, n), xInter = array(NA, n),
+                                   yInter = array(NA, n), l = array(NA, n), 
+                                   l1 = array(NA, n), l2 = array(NA, n))
+    lmbda <- react_lmbda()
+    coordinatesForUPAtStart <- coordinatesForUP
+    pDisconnect <- array(NA, NumberOfIteration)
+    pConnect <- array(NA, NumberOfIteration)
     
     observe({
       isolate({ 
-        n <- react_n()
-        HTx <- react_HTx()
-        # HTx <- 50
-        Lmin <- 0
-        Lmax <- 20
-        R <- react_R()
-        # R <- 100
-        NumberOfIteration <- react_NumberOfIteraion()
-        # NumberOfIteration <- 12
-        APPoint <- data.frame(x = react_APPointX(), y = react_APPointY())
-        # APPoint <- data.frame(x = 50, y = 50)
-        HBuild <- react_HBuild()
-        # HBuild <- 30
-        HTxMin <- 30
-        HTxMax <- 30
-        gridSize <- data.frame(x = 100, y = 100)
-        coordinatesForUP <- data.frame(x = runif(n, 0, gridSize$x), y = runif(n, 0, gridSize$y),
-                                       H = array(2, n), flag = array(FALSE, n), xInter = array(NA, n),
-                                       yInter = array(NA, n), l = array(NA, n), 
-                                       l1 = array(NA, n), l2 = array(NA, n))
-        lmbda <- react_lmbda()
-        coordinatesForUPAtStart <- coordinatesForUP
-        pDisconnect <- array(NA, NumberOfIteration)
-        pConnect <- array(NA, NumberOfIteration)
-        
-        
-        
         # основная программа
         for (k in 2:NumberOfIteration) {
           coordinatesForUP <- coordinatesForUPAtStart
           lmbd <- k * lmbda
           while (TRUE) {
-            coreOfCoordinates <- rpoispp(lmbd, win = owin(c(0,100), c(0,100)))
+            coreOfCoordinates <- rpoispp(lmbd, win = owin(c(0,gridSize$x), c(0,gridSize$y)))
             BuildNumber <- coreOfCoordinates$n
             if (BuildNumber > 1) {break}
           }
