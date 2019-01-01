@@ -47,26 +47,22 @@ shinyServer(function(input, output) {
     # D - расстояние между Tx и Rx в плоскости XoY
     
     
-    n <- react_n()
+    n <<- react_n()
     HTx <- react_HTx()
-    # HTx <- 50
     Lmin <- 0
     Lmax <- 20
     R <- react_R()
-    # R <- 100
     NumberOfIteration <<- react_NumberOfIteraion()
-    # NumberOfIteration <- 12
-    APPoint <- data.frame(x = react_APPointX(), y = react_APPointY())
-    # APPoint <- data.frame(x = 50, y = 50)
+    APPoint <<- data.frame(x = react_APPointX(), y = react_APPointY())
     HBuild <- react_HBuild()
-    # HBuild <- 30
     HTxMin <- 30
     HTxMax <- 30
-    gridSize <- data.frame(x = 100, y = 100)
+    gridSize <<- data.frame(x = react_gridSizeX(), y = react_gridSizeY())
     coordinatesForUP <- data.frame(x = runif(n, 0, gridSize$x), y = runif(n, 0, gridSize$y),
                                    H = array(2, n), flag = array(FALSE, n), xInter = array(NA, n),
                                    yInter = array(NA, n), l = array(NA, n), 
                                    l1 = array(NA, n), l2 = array(NA, n))
+    coordinatesForUPForFigure <<- coordinatesForUP
     lmbda <<- react_lmbda()
     coordinatesForUPAtStart <- coordinatesForUP
     pDisconnect <- array(NA, NumberOfIteration)
@@ -81,18 +77,17 @@ shinyServer(function(input, output) {
             coordinatesForUP <- coordinatesForUPAtStart
             lmbd <- k * lmbda
             while (TRUE) {
-              coreOfCoordinates <- rpoispp(lmbd, win = owin(c(0,100), c(0,100)))
-              BuildNumber <- coreOfCoordinates$n
+              coreOfCoordinates <- rpoispp(lmbd, win = owin(c(0,gridSize$x), c(0,gridSize$y)))
+              BuildNumber <<- coreOfCoordinates$n
               if (BuildNumber > 1) {break}
             }
-            buildingInfo <- data.frame(x1 = array(NA, BuildNumber), y1 = array(NA, BuildNumber), x2 = array(NA, BuildNumber),
+            buildingInfo <<- data.frame(x1 = array(NA, BuildNumber), y1 = array(NA, BuildNumber), x2 = array(NA, BuildNumber),
                                        y2 = array(NA, BuildNumber), H = HBuild, L = array(NA, BuildNumber), angle = array(NA, BuildNumber))
-            
             HTx <- array(HTx, dim = NumberOfIteration)
             
             
             # инициация постройки зданий с общей информацией
-            buildingInfo <- PointsForBuilding(lmbd, Lmin, Lmax, buildingInfo, BuildNumber, coreOfCoordinates)
+            buildingInfo <<- PointsForBuilding(lmbd, Lmin, Lmax, buildingInfo, BuildNumber, coreOfCoordinates)
             for (i in 1:n) {
               for (j in 1:BuildNumber) {
                 coordinatesForUP <- VerificationUP(i, j, APPoint, coordinatesForUP, buildingInfo)
@@ -113,37 +108,34 @@ shinyServer(function(input, output) {
             pDisconnect[k] <- length(coordinatesForUP[coordinatesForUP[,"flag"] == TRUE,1])/n
             pConnect[k] <<- 1 - pDisconnect[k]
             incProgress(1/k, detail = paste("Doing iteration", k))
+            coordinatesForUPForFigure <<- coordinatesForUP
           }
-          
-          
-          
-          # oX <- c(2:8)
-          # oX <- oX * 10^-420
-          # sm <- smooth.spline(oX, pConnect[2:8], spar = 0.35)
-          # plot(sm, type = 'l', ylab = "connection probability", xlab = "building density")
-          # 
-          # plot(0,0,xlim = c(0,100), ylim = c(0,100), col = "white")
-          # for (i in 1:BuildNumber) {
-          #   lines(x = c(buildingInfo$x1[i], buildingInfo$x2[i]), y = c(buildingInfo$y1[i], buildingInfo$y2[i]))
-          # }
-          # for (i in 1:n) {
-          #   points(coordinatesForUP$x[coordinatesForUP[,"flag"] == TRUE],
-          #          coordinatesForUP$y[coordinatesForUP[,"flag"] == TRUE], pch = 19, col = "red")
-          #   points(coordinatesForUP$x[coordinatesForUP[,"flag"] == FALSE],
-          #          coordinatesForUP$y[coordinatesForUP[,"flag"] == FALSE], pch = 19, col = "green")
-          #   points(APPoint$x, APPoint$y, pch = 19, col = "black")
-          # }
         })
       })
     })
   })
   observeEvent(input$FigureOne, {
-    output$EndPlot <- renderPlot({
+    output$Figure <- renderPlot({
       oX <- c(2:NumberOfIteration)
       oX <- oX * lmbda
       sm <- smooth.spline(oX, pConnect[2:NumberOfIteration], spar = 0.5)
       plot(sm, type = 'l', ylab = "connection probability", xlab = "building density")
       title("График зависимости плотности распределения зданий от вероятности подключения")
     })  
+  })
+  observeEvent(input$FigureTwo, {
+    output$Figure <- renderPlot({
+      plot(0, 0, xlim = c(0, gridSize$x), ylim = c(0,gridSize$y), col = "white")
+      for (i in 1:BuildNumber) {
+        lines(x = c(buildingInfo$x1[i], buildingInfo$x2[i]), y = c(buildingInfo$y1[i], buildingInfo$y2[i]))
+      }
+      for (i in 1:n) {
+        points(coordinatesForUPForFigure$x[coordinatesForUPForFigure[,"flag"] == TRUE],
+               coordinatesForUPForFigure$y[coordinatesForUPForFigure[,"flag"] == TRUE], pch = 19, col = "red")
+        points(coordinatesForUPForFigure$x[coordinatesForUPForFigure[,"flag"] == FALSE],
+               coordinatesForUPForFigure$y[coordinatesForUPForFigure[,"flag"] == FALSE], pch = 19, col = "green")
+        points(APPoint$x, APPoint$y, pch = 19, col = "black")
+      }
+    })
   })
 })

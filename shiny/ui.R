@@ -32,11 +32,12 @@ shinyUI(
         numericInput ("R", 
           label = "Радиус действия AP", value = 100),
         actionButton("Simulation", "Симуляция"),
-        actionButton("FigureOne", "График")
+        actionButton("FigureOne", "График (Вероятность подключения - плотность зданий)"),
+        actionButton("FigureTwo", "График симуляционный")
       ),
       # Функция, определяющая структуру основного окна приложения:
       mainPanel (
-        plotOutput("EndPlot", width = '100%', height = "700px")
+        plotOutput("Figure", width = '100%', height = "700px")
       )
     )
   )
