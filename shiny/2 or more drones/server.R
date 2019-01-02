@@ -102,7 +102,7 @@ shinyServer(function(input, output) {
                 coordinatesForUP$flag[i] <- TRUE
               }
             }
-            pDisconnect[k] <- length(coordinatesForUP[coordinatesForUP[,"flag"] == TRUE,1])/n
+            pDisconnect[k] <- length(coordinatesForUP[coordinatesForUP[,"flag"] == TRUE,1])/length(coordinatesForUPAll[,1])
             pConnect[k] <<- 1 - pDisconnect[k]
             incProgress(1/k, detail = paste("Doing iteration", k))
             coordinatesForUPCache <<- coordinatesForUP[which(coordinatesForUP$flag == TRUE), ]

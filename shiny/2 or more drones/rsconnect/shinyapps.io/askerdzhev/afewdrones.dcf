@@ -1,0 +1,13 @@
+name: afewdrones
+title: AFewDrones
+username:
+account: askerdzhev
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 625616
+bundleId: 1793263
+url: https://askerdzhev.shinyapps.io/afewdrones/
+when: 1546443710.94444
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|Coordinates.csv
