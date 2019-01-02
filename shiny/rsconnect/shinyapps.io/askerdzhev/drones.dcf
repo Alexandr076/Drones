@@ -5,9 +5,9 @@ account: askerdzhev
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 625138
-bundleId: 1791334
+bundleId: 1791933
 url: https://askerdzhev.shinyapps.io/drones/
-when: 1546308913.64629
+when: 1546368310.63766
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: servertest.R
+ignoredFiles: .RData|servertest.R
