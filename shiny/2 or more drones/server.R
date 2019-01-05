@@ -122,7 +122,7 @@ shinyServer(function(input, output) {
   observeEvent(input$FigureOne, {
     output$Figure <- renderPlot({
       oX <- c(1:length(APPointAll[,1]))
-      sm <- smooth.spline(oX, pConnect[1:length(APPointAll[,1])], spar = 0.5)
+      sm <- smooth.spline(oX, pConnect[1:length(APPointAll[,1])], spar = 0)
       plot(sm, type = 'l', ylab = "Вероятность подключения UP к AP", xlab = "Количество AP")
       title("Зависимость возможности подключения от количества AP")
     })
