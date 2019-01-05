@@ -118,7 +118,7 @@ shinyServer(function(input, output) {
     output$Figure <- renderPlot({
       oX <- c(2:NumberOfIteration)
       oX <- oX * lmbda
-      sm <- smooth.spline(oX, pConnect[2:NumberOfIteration], spar = 0.5)
+      sm <- smooth.spline(oX, pConnect[2:NumberOfIteration], spar = 0)
       plot(sm, type = 'l', ylab = "connection probability", xlab = "building density")
       title("График зависимости плотности распределения зданий от вероятности подключения")
     })  
