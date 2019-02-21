@@ -12,26 +12,26 @@ source('C:/R/drones/header.R')
     mass <- data.frame(x1 = array(NA, N), y1 = array(NA, N), x2 = array(NA, N), y2 = array(NA, N))
     # foreach(i = 1:N) %do%
     # mass$x1[i] = 
-    mass$x1[1] = 7
-    mass$y1[1] = 15
-    mass$x2[1] = 9
-    mass$y2[1] = 20
-    mass$x1[2] = 1
-    mass$y1[2] = 25
-    mass$x2[2] = 15
-    mass$y2[2] = 35
-    mass$x1[3] = 30
-    mass$y1[3] = 2
-    mass$x2[3] = 33
-    mass$y2[3] = 30
-    mass$x1[4] = 10
-    mass$y1[4] = 10
-    mass$x2[4] = 25
-    mass$y2[4] = 5
-    mass$x1[5] = 20
-    mass$y1[5] = 32
-    mass$x2[5] = 30
-    mass$y2[5] = 30
+    mass$x1[1] = 7*2.5
+    mass$y1[1] = 15*2.5
+    mass$x2[1] = 9*2.5
+    mass$y2[1] = 20*2.5
+    mass$x1[2] = 1*2.5
+    mass$y1[2] = 25*2.5
+    mass$x2[2] = 15*2.5
+    mass$y2[2] = 35*2.5
+    mass$x1[3] = 30*2.5
+    mass$y1[3] = 2*2.5
+    mass$x2[3] = 33*2.5
+    mass$y2[3] = 30*2.5
+    mass$x1[4] = 10*2.5
+    mass$y1[4] = 10*2.5
+    mass$x2[4] = 25*2.5
+    mass$y2[4] = 5*2.5
+    mass$x1[5] = 20*2.5
+    mass$y1[5] = 32*2.5
+    mass$x2[5] = 30*2.5
+    mass$y2[5] = 30*2.5
     
     # Вызов функции для записи информации о зданиях
     buildingInfo <- BuildingCreator(mass, APPoint)
@@ -126,16 +126,16 @@ source('C:/R/drones/header.R')
   # NumberOfIteration - количество итераций
   # R - дальность действия передатчика
   
-  R <<- 55
-  NumberOfIteration <- 50
-  APPoint <<- data.frame(x = 20, y = 20)
-  H <<- 8  # build
+  R <<- 100
+  NumberOfIteration <- 20
+  APPoint <<- data.frame(x = 50, y = 50)
+  H <<- 30  # build
   N <<- 5
   n <<- 10000
   # не глобал, но определяет минимальную и максимальную высоту передатчика
-  HTxMin <- 40
-  HTxMax <- 55
-  gridSize <<- data.frame(x = 40, y = 40)
+  HTxMin <- 45
+  HTxMax <- 95
+  gridSize <<- data.frame(x = 100, y = 100)
   coordinatesForUP <<- data.frame(x = array(NA,n), y = array(NA,n),
                                   H = 2, flag = array(FALSE, n), xInter = array(NA, n),
                                   yInter = array(NA,n), l = array(NA, n), l1 = array(NA, n), l2 = array(NA, n))
@@ -157,12 +157,12 @@ source('C:/R/drones/header.R')
   pDisconnect <<- array(NA, NumberOfIteration)
   pConnect <<- array(NA, NumberOfIteration)
   S <<- array(NA, NumberOfIteration)
-  coordinatesForUP$x <- coordinatesForUP$x/2.5
-  coordinatesForUP$y <- coordinatesForUP$y/2.5
+  coordinatesForUP$x <- coordinatesForUP$x
+  coordinatesForUP$y <- coordinatesForUP$y
   coordinatesForUPCache <<- coordinatesForUP
 }
 
-par(mfrow=c(2,2))
+# par(mfrow=c(2,2))
 
 
 for (k in 1:NumberOfIteration) {
@@ -210,16 +210,16 @@ for (k in 1:NumberOfIteration) {
   
   # графики
   # if (k %% 12 == 0) {
-  plot(APPoint$x, APPoint$y, xlim = c(0,40), ylim = c(0,40), col = "black", pch = 19, xlab = 'x', ylab = 'y')
-  lines(x = c(buildingInfo$x1[1],buildingInfo$x2[1]), y = c(buildingInfo$y1[1],buildingInfo$y2[1]))
-  lines(x = c(buildingInfo$x1[2],buildingInfo$x2[2]), y = c(buildingInfo$y1[2],buildingInfo$y2[2]))
-  lines(x = c(buildingInfo$x1[3],buildingInfo$x2[3]), y = c(buildingInfo$y1[3],buildingInfo$y2[3]))
-  lines(x = c(buildingInfo$x1[4],buildingInfo$x2[4]), y = c(buildingInfo$y1[4],buildingInfo$y2[4]))
-  lines(x = c(buildingInfo$x1[5],buildingInfo$x2[5]), y = c(buildingInfo$y1[5],buildingInfo$y2[5]))
-  points(coordinatesForUP$x[coordinatesForUP[,"flag"] == TRUE],
-         coordinatesForUP$y[coordinatesForUP[,"flag"] == TRUE], pch = 19, col = "red")
-  points(coordinatesForUP$x[coordinatesForUP[,"flag"] == FALSE],
-         coordinatesForUP$y[coordinatesForUP[,"flag"] == FALSE], pch = 19, col = "green")
+  # plot(APPoint$x, APPoint$y, xlim = c(0,100), ylim = c(0,100), col = "black", pch = 19, xlab = 'x', ylab = 'y')
+  # lines(x = c(buildingInfo$x1[1],buildingInfo$x2[1]), y = c(buildingInfo$y1[1],buildingInfo$y2[1]))
+  # lines(x = c(buildingInfo$x1[2],buildingInfo$x2[2]), y = c(buildingInfo$y1[2],buildingInfo$y2[2]))
+  # lines(x = c(buildingInfo$x1[3],buildingInfo$x2[3]), y = c(buildingInfo$y1[3],buildingInfo$y2[3]))
+  # lines(x = c(buildingInfo$x1[4],buildingInfo$x2[4]), y = c(buildingInfo$y1[4],buildingInfo$y2[4]))
+  # lines(x = c(buildingInfo$x1[5],buildingInfo$x2[5]), y = c(buildingInfo$y1[5],buildingInfo$y2[5]))
+  # points(coordinatesForUP$x[coordinatesForUP[,"flag"] == TRUE],
+  #        coordinatesForUP$y[coordinatesForUP[,"flag"] == TRUE], pch = 19, col = "red")
+  # points(coordinatesForUP$x[coordinatesForUP[,"flag"] == FALSE],
+  #        coordinatesForUP$y[coordinatesForUP[,"flag"] == FALSE], pch = 19, col = "green")
   # }
 }
 # нужно реализовать параллельный процесс
@@ -248,6 +248,6 @@ foreach (i = 2:25) %do% {
   prob[i] = mean(pConnect[i,])
 }
 
-
+plot(x = HTx, y = pConnect,  type = 'l')
 
 

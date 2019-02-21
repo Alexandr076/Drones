@@ -117,3 +117,18 @@ IsLOSWithoutBuilding <- function(i, HTx, coordinatesForUP, R) {
     return(FALSE)
   }
 }
+
+# функция для расчета R (https://arxiv.org/pdf/1708.02557.pdf)
+ChangeRangeForDrones <- function(R, PL) {
+  R <- 
+}
+
+xxx <- 32.4 + 21*log10(5000) + 20*log10(28)
+
+
+
+
+
+
+
+
