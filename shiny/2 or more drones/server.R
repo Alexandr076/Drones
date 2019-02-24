@@ -83,7 +83,8 @@ shinyServer(function(input, output) {
             coordinatesForUP <- coordinatesForUPCache
             n <- length(coordinatesForUP[,1])
             APPoint <<- APPointAll[k,]
-            HTx <- array(HTx, dim = length(APPointAll[,1]))
+            HTx <- array(HTx, dim = length(APPointAll[,1])) # нужно нормально запилить, а не массивом (я верю в себя: лень
+              # не может быть так сильна!)
             
             for (i in 1:n) {
               for (j in 1:BuildNumber) {
@@ -98,6 +99,7 @@ shinyServer(function(input, output) {
               if ( (coordinatesForUP$flag[i] == TRUE) && IsNotLOS(i, HTx[k], coordinatesForUP, HBuild) == FALSE) {
                 coordinatesForUP$flag[i] <- FALSE
               }
+              # тут нужно добавить флаг, ибо еще подбираю зайцев с флагом true
               if (IsLOSWithoutBuilding(i, HTx[k], coordinatesForUP, R) == TRUE) {
                 coordinatesForUP$flag[i] <- TRUE
               }
