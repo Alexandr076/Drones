@@ -1,7 +1,4 @@
-library("foreach")
 library("retistruct")
-library("doParallel")
-library("doSNOW")
 library("raster")
 library("spatstat")
 source('C:/R/drones/header.R')
@@ -12,26 +9,26 @@ source('C:/R/drones/header.R')
     mass <- data.frame(x1 = array(NA, N), y1 = array(NA, N), x2 = array(NA, N), y2 = array(NA, N))
     # foreach(i = 1:N) %do%
     # mass$x1[i] = 
-    mass$x1[1] = 7*2.5
-    mass$y1[1] = 15*2.5
-    mass$x2[1] = 9*2.5
-    mass$y2[1] = 20*2.5
-    mass$x1[2] = 1*2.5
-    mass$y1[2] = 25*2.5
-    mass$x2[2] = 15*2.5
-    mass$y2[2] = 35*2.5
-    mass$x1[3] = 30*2.5
-    mass$y1[3] = 2*2.5
-    mass$x2[3] = 33*2.5
-    mass$y2[3] = 30*2.5
-    mass$x1[4] = 10*2.5
-    mass$y1[4] = 10*2.5
-    mass$x2[4] = 25*2.5
-    mass$y2[4] = 5*2.5
-    mass$x1[5] = 20*2.5
-    mass$y1[5] = 32*2.5
-    mass$x2[5] = 30*2.5
-    mass$y2[5] = 30*2.5
+    mass$x1[1] = 65+2.12132
+    mass$y1[1] = 50+2.12132
+    mass$x2[1] = 65-2.12132
+    mass$y2[1] = 50-2.12132
+    # mass$x1[2] = 1*2.5
+    # mass$y1[2] = 25*2.5
+    # mass$x2[2] = 15*2.5
+    # mass$y2[2] = 35*2.5
+    # mass$x1[3] = 30*2.5
+    # mass$y1[3] = 2*2.5
+    # mass$x2[3] = 33*2.5
+    # mass$y2[3] = 30*2.5
+    # mass$x1[4] = 10*2.5
+    # mass$y1[4] = 10*2.5
+    # mass$x2[4] = 25*2.5
+    # mass$y2[4] = 5*2.5
+    # mass$x1[5] = 20*2.5
+    # mass$y1[5] = 32*2.5
+    # mass$x2[5] = 30*2.5
+    # mass$y2[5] = 30*2.5
     
     # Вызов функции для записи информации о зданиях
     buildingInfo <- BuildingCreator(mass, APPoint)
@@ -44,7 +41,7 @@ source('C:/R/drones/header.R')
     # Фрейм с данными об объекте buildingInfo
     # Записываются все данные о здании: две крайние точки прямой и углы между прямыми, соединяющими AP
     # и эти точки относительно oX
-    foreach(i=1:N) %do% {
+    for (i in 1:N) {
       buildingInfo$x1[i] <<- M$x1[i]
       buildingInfo$y1[i] <<- M$y1[i]
       buildingInfo$x2[i] <<- M$x2[i]
@@ -81,7 +78,7 @@ source('C:/R/drones/header.R')
     }
   }
   
-  # функция для проверки LOS без учета максимального действия AP
+  # функция для проверки LOS без учета максимального действия AP (true - если заблокировано)
   IsLOS <- function(i, k) {
     tgAlpha <- (HTx[k] - coordinatesForUP$H[i])/coordinatesForUP$l[i]
     H_res <- tgAlpha*coordinatesForUP$l2[i] + coordinatesForUP$H[i]
@@ -93,7 +90,7 @@ source('C:/R/drones/header.R')
     }
   }
   
-  # функция для проверки расстояние от AP До UP
+  # функция для проверки расстояние от AP До UP (true - если незаблокирован)
   IsLOSWithoutBuilding <- function(i, k) {
     d <- sqrt( (HTx[k] - coordinatesForUP$H[i])^2 + (coordinatesForUP$l[i])^2 )
     if ( d < R) {
@@ -128,12 +125,12 @@ source('C:/R/drones/header.R')
   
   R <<- 100
   NumberOfIteration <- 20
-  APPoint <<- data.frame(x = 50, y = 50)
+  APPoint <<- data.frame(x = 90, y = 50.5)
   H <<- 30  # build
-  N <<- 5
+  N <<- 1
   n <<- 10000
   # не глобал, но определяет минимальную и максимальную высоту передатчика
-  HTxMin <- 45
+  HTxMin <- 55
   HTxMax <- 95
   gridSize <<- data.frame(x = 100, y = 100)
   coordinatesForUP <<- data.frame(x = array(NA,n), y = array(NA,n),
@@ -160,6 +157,8 @@ source('C:/R/drones/header.R')
   coordinatesForUP$x <- coordinatesForUP$x
   coordinatesForUP$y <- coordinatesForUP$y
   coordinatesForUPCache <<- coordinatesForUP
+  AllPointWithLOSInCicle <<- array(NA, NumberOfIteration)
+  AllBlockages <<- array(NA, NumberOfIteration)
 }
 
 # par(mfrow=c(2,2))
@@ -174,8 +173,8 @@ for (k in 1:NumberOfIteration) {
   # инициация постройки зданий с общей информацией 
   PointsForBuilding(N)
   # по всем точкам UP (1:n) проверка для каждого здания (1:N), что есть пересечение отрезка здания и {AP,UP}
-  foreach(i = 1:n) %do% {
-    foreach(j = 1:N) %do% {
+  for (i in 1:n) {
+    for (j in 1:N) {
       VerificationUP(i, j)
     }
   }
@@ -185,7 +184,16 @@ for (k in 1:NumberOfIteration) {
   # coordinatesForUPWithTrueFlag <<- coordinatesForUP[coordinatesForUP[,"flag"] == TRUE,]
   # для каждой заблокированной точки вычисляем H и исправляем флаг, если нужно
   M <<- 0
+  Blockage <<- 0
+  AllPointWithLOSInCicle <<- 0
   for (i in 1:length(coordinatesForUP[,1])) {
+    # if (IsLOSWithoutBuilding(i, k) == TRUE) {
+    #   PointsWithLOSInCicle <- PointsWithLOSInCicle + 1       
+    # }
+    if ( (coordinatesForUP$flag[i] == TRUE)  && (IsLOSWithoutBuilding(i, k) == TRUE) && (IsLOS(i, k) == TRUE) )
+    {
+      Blockage <- Blockage + 1
+    }
     if ( (coordinatesForUP$flag[i] == TRUE) && IsLOS(i, k) == FALSE) {
       coordinatesForUP$flag[i] <- FALSE
       if (IsLOSWithoutBuilding(i, k) == FALSE) {
@@ -199,13 +207,15 @@ for (k in 1:NumberOfIteration) {
       coordinatesForUP$flag[i] <- TRUE
     }
   }
-  # количество заблокированных UP в пространстве
-  Blocks <- M
+  # количество незаблокированных UP в пространстве
+  # AllPointWithLOSInCicle[k] <- PointsWithLOSInCicle
+  NonBlocks <- M
   
   # вычисляем вероятность успешного коннекта
   pDisconnect[k] <- length(coordinatesForUP[coordinatesForUP[,"flag"] == TRUE,1])/n
   pConnect[k] <- 1 - pDisconnect[k]
-  S[k] <- Blocks
+  S[k] <- NonBlocks
+  AllBlockages[k] <- Blockage
   
   
   # графики
@@ -233,20 +243,41 @@ ptime <- system.time({
 stopCluster(cl)
 ptime
 
+
+plot(APPoint$x, APPoint$y, xlim = c(0,100), ylim = c(0,100), col = "black", pch = 19, xlab = 'x', ylab = 'y')
+lines(x = c(buildingInfo$x1[1],buildingInfo$x2[1]), y = c(buildingInfo$y1[1],buildingInfo$y2[1]))
+# lines(x = c(buildingInfo$x1[2],buildingInfo$x2[2]), y = c(buildingInfo$y1[2],buildingInfo$y2[2]))
+# lines(x = c(buildingInfo$x1[3],buildingInfo$x2[3]), y = c(buildingInfo$y1[3],buildingInfo$y2[3]))
+# lines(x = c(buildingInfo$x1[4],bulidingInfo$x2[4]), y = c(buildingInfo$y1[4],buildingInfo$y2[4]))
+# lines(x = c(buildingInfo$x1[5],buildingInfo$x2[5]), y = c(buildingInfo$y1[5],buildingInfo$y2[5]))
+points(coordinatesForUP$x[coordinatesForUP[,"flag"] == TRUE],
+       coordinatesForUP$y[coordinatesForUP[,"flag"] == TRUE], pch = 19, col = "red")
+points(coordinatesForUP$x[coordinatesForUP[,"flag"] == FALSE],
+       coordinatesForUP$y[coordinatesForUP[,"flag"] == FALSE], pch = 19, col = "green")
+
+datat <- smooth.spline(HTx, S, spar = 0.5)
+plot(datat,type ='l', xlab = 'Высота, м', ylab = expression('Площадь S'[gain]))
+
+#PBlockage <- AllBlockages/(3.141592*(sqrt(R^2 - (HTx - 2)^2))^2)
+PNonBlockage <- S/SAll
+dataP <- smooth.spline(HTx, PNonBlockage, spar = 0.5)
+plot(dataP,type ='l', xlab = 'Высота, м', ylab = expression('Площадь "теневой" области'), lwd = 2, col = 'red')
+
 # на всякий случай, вдруг пригодится
 points(coordinatesForUP$x[9], 
        coordinatesForUP$y[9], pch = 19, col = "red")
 points(coordinatesForUP$x[1], coordinatesForUP$y[1], col = 'green', pch = 19)
 points(coordinatesForUP$x[15], coordinatesForUP$y[15], col = 'red', pch = 19)
 
-library('spatstat')
-x <- rHardcore(100, 0.00001)
-mean(pConnect[14,], type = 'l')
-prob <- array(NA, 25)
-prob[1] <- 0
-foreach (i = 2:25) %do% {
-  prob[i] = mean(pConnect[i,])
-}
+
+newHTx <- HTx - 2
+RProjection <- sqrt(100^2-newHTx^2)
+SAll <- 3.141592*RProjection^2
+ 
+grid(nx = NULL, , lty = 1, lwd = 2)
+plot(HTx, dataP$y, type ='l', col = 'red', lwd = 2, xlab = 'Высота точки доступа, м',
+     ylab = 'Вероятность подключения за зданием')
+
 
 plot(x = HTx, y = pConnect,  type = 'l')
 
