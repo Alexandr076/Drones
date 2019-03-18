@@ -1,0 +1,12 @@
+name: droneswithosmmap
+title: DronesWithOSMMap
+username:
+account: askerdzhev
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 796324
+bundleId: 1947038
+url: https://askerdzhev.shinyapps.io/droneswithosmmap/
+when: 1552899602.00136
+asMultiple: FALSE
+asStatic: FALSE

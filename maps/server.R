@@ -66,23 +66,23 @@ shinyServer(function(input, output) {
       isolate({
         # основная программа
         # подгрузка фрейма со зданиями из JSON
-        coordinatesForBuildings <- PointsForBuildingFromJson(dataFromJson, coordinatesForBuildings)
+        # coordinatesForBuildings <- PointsForBuildingFromJson(dataFromJson, coordinatesForBuildings)
         # подгрузка фрейма с координатами пользователей
-        coordinatesForUP <- PointsForUP(coordinatesForUP, n, coordinatesForBuildings)
+        # coordinatesForUP <- PointsForUP(coordinatesForUP, n, coordinatesForBuildings)
         # количество зданий
-        countOfBuildings <- coordinatesForBuildings$Number[which.max(coordinatesForBuildings$Number)]
+        # countOfBuildings <- coordinatesForBuildings$Number[which.max(coordinatesForBuildings$Number)]
         # высота HTx
-        HTx <- seq(HTxMin, HTxMax, NumberOfIteration)
-        for (k in 1:NumberOfIteration) {
-          coordinatesForUP <- coordinatesForUPAtStart
+        # HTx <- seq(HTxMin, HTxMax, NumberOfIteration)
+        # for (k in 1:NumberOfIteration) {
+          # coordinatesForUP <- coordinatesForUPAtStart
           # координаты для UP с флагом true
-          for (i in 1:n) {
-            for (j in 1:BuildNumber) {
-              coordinatesForUP <- VerificationUP(i, j, APPoint, coordinatesForUP, buildingInfo)
-            }
-          }
+          # for (i in 1:n) {
+            # for (j in 1:BuildNumber) {
+              # coordinatesForUP <- VerificationUP(i, j, APPoint, coordinatesForUP, buildingInfo)
+            # }
+          # }
           # для каждой заблокированной точки вычисляем H и исправляем флаг, если нужно
-          for (i in 1:n) {
+          # for (i in 1:n) {
             # if ( (coordinatesForUP$flag[i] == TRUE) && IsNotLOS(i, HTx[k], coordinatesForUP, HBuild) == FALSE) {
         #       coordinatesForUP$flag[i] <- FALSE
         #     }
