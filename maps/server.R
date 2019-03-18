@@ -66,13 +66,13 @@ shinyServer(function(input, output) {
       isolate({
         # основная программа
         # подгрузка фрейма со зданиями из JSON
-        # coordinatesForBuildings <- PointsForBuildingFromJson(dataFromJson, coordinatesForBuildings)
+        coordinatesForBuildings <- PointsForBuildingFromJson(dataFromJson, coordinatesForBuildings)
         # подгрузка фрейма с координатами пользователей
-        # coordinatesForUP <- PointsForUP(coordinatesForUP, n, coordinatesForBuildings)
+        coordinatesForUP <- PointsForUP(coordinatesForUP, n, coordinatesForBuildings)
         # количество зданий
-        # countOfBuildings <- coordinatesForBuildings$Number[which.max(coordinatesForBuildings$Number)]
+        countOfBuildings <- coordinatesForBuildings$Number[which.max(coordinatesForBuildings$Number)]
         # высота HTx
-        # HTx <- seq(HTxMin, HTxMax, NumberOfIteration)
+        HTx <- seq(HTxMin, HTxMax, NumberOfIteration)
         # for (k in 1:NumberOfIteration) {
           # coordinatesForUP <- coordinatesForUPAtStart
           # координаты для UP с флагом true
