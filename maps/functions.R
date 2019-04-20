@@ -1,3 +1,28 @@
+# перевод расстояния между точками с gps координат в метры
+DistBetweenPointsInMetres <- function(lat1, long1, lat2, long2) {
+  # радиус Земли
+  R <- 6372795
+  # перевод коордитат в радианы
+  lat1 <- lat1 * pi / 180
+  lat2 <- lat2 * pi / 180
+  long1 <- long1 * pi / 180
+  long2 <- long2 * pi / 180
+  # вычисление косинусов и синусов широт и разницы долгот
+  cl1 <- cos(lat1)
+  cl2 <- cos(lat2)
+  sl1 <- sin(lat1)
+  sl2 <- sin(lat2)
+  delta <- long2 - long1
+  cdelta <- cos(delta)
+  sdelta <- sin(delta)
+  # вычисления длины большого круга
+  y <- sqrt( (cl2 * sdelta)^2 + (cl1 * sl2 - sl1 * cl2 * cdelta)^2 )
+  x <- sl1 * sl2 + cl1 * cl2 * cdelta
+  ad <- atan(y/x)
+  dist <- ad * R # расстояние между двумя координатами в метрах
+  return(dist)
+}
+
 # координаты для пользовательских устройств, распределенных вне зданий для заданного json файла
 PointsForUP <- function(coordinatesForUP, n, coordinatesForBuildings) {
   iter <- 1
@@ -16,15 +41,16 @@ PointsForUP <- function(coordinatesForUP, n, coordinatesForBuildings) {
        break()
      }
     }
-    if (buildingiter == coordinatesForBuildings$Number[which.max(coordinatesForBuildings$Number)]) {
+    if ( (exists("buildingiter")) && (buildingiter == coordinatesForBuildings$Number[which.max(coordinatesForBuildings$Number)]) ) {
       iter <- iter + 1
     }
+    rm("buildingiter")
   }
   return (coordinatesForUP)
 }
 
 # функция для формирования зданий из предложенного json файла
-PointsForBuildingFromJson <- function(data, mapToData) {
+PointsForBuildingFromJson <- function(data, mapToData, H) {
   tryCatch({
   i <- 1
   while (TRUE) {
@@ -40,7 +66,7 @@ PointsForBuildingFromJson <- function(data, mapToData) {
             level <- as.double(data$features[[i]]$properties["building:levels"])
           }
           buf <- data.frame("Level" = level, "Number" = i, 
-                                          "x" = x, "y" = y, H = NA, L = NA)
+                                          "x" = x, "y" = y, H = level * H, L = NA)
           mapToData <- rbind(mapToData, buf)
           j <- j + 1
         }
@@ -111,50 +137,38 @@ BuildingCreator <- function(M, APPoint) {
 # прямой здания существует, то записывается координата пересечения, иначе - false. Здесь l1 - расстояние
 # от AP до точки пересечения (Inter), l2 - от Inter до UP, l - общая длина от AP До UP
 
-VerificationUP <- function(n, N, APPoint, coordinatesForUP, buildingInfo) {
-  coordinates <- line.line.intersection(c(APPoint$x,APPoint$y), c(coordinatesForUP$x[n], 
-                                    coordinatesForUP$y[n]), c(buildingInfo$x1[N],buildingInfo$y1[N]),
-                                        c(buildingInfo$x2[N],buildingInfo$y2[N]), interior.only = "true")
+VerificationUP <- function(n, APPoint, coordinatesForUP, buildingInfo, HTx) {
+  for (j in 1:(length(buildingInfo[,1])-1)) {
+    coordinates <- line.line.intersection(c(APPoint$x,APPoint$y), c(coordinatesForUP$x[n], 
+                                    coordinatesForUP$y[n]), c(buildingInfo$x[j],buildingInfo$y[j]),
+                                        c(buildingInfo$x[j+1],buildingInfo$y[j+1]), interior.only = "true")
   
-  coordinatesForUP$l[n] <- pointDistance(c(APPoint$x,APPoint$y), 
-                                        c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
-                                          lonlat = FALSE)
-  
-  if (typeof(coordinates) != "logical") {
-    # координаты точки пересечения и просчет длин l, l1, l2, проставление флага
-    coordinatesForUP$flag[n] <- "TRUE"
-    coordinatesForUP$xInter[n] <- coordinates[1]
-    coordinatesForUP$yInter[n] <- coordinates[2]
-    l2 <- pointDistance(c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]), 
-                                    c(coordinatesForUP$x[n],coordinatesForUP$y[n]), 
-                                        lonlat = FALSE) 
-    if ( !is.na(coordinatesForUP$l2[n]) ) {
-      
-      
-      if (l2 < coordinatesForUP$l2[n]) {
-        coordinatesForUP$l1[n] <- pointDistance(c(APPoint$x,APPoint$y), 
-                                                 c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]),
-                                                 lonlat = FALSE)
-        coordinatesForUP$l2[n] <- l2
-        }
-      }
-    else {
-      coordinatesForUP$l1[n] <- pointDistance(c(APPoint$x,APPoint$y), 
-                                                 c(coordinatesForUP$xInter[n],coordinatesForUP$yInter[n]),
-                                                 lonlat = FALSE)
+    if (typeof(coordinates) != "logical") {
+      # координаты точки пересечения и просчет длин l, l1, l2, проставление флага
+      coordinatesForUP$flag[n] <- "TRUE"
+      l2 <- DistBetweenPointsInMetres(coordinates[1], coordinates[2], coordinatesForUP$x[n], coordinatesForUP$y[n])
       coordinatesForUP$l2[n] <- l2
+      coordinatesForUP$xInter[n] <- coordinates[1]
+      coordinatesForUP$yInter[n] <- coordinates[2]
+      coordinatesForUP$HBlockage[n] <- buildingInfo$H[1]
+      HBlockage <- coordinatesForUP$HBlockage[n]
+      if (IsNotLOS(n, HTx, coordinatesForUP, HBlockage) == FALSE) {
+        coordinatesForUP$flag[n] = FALSE
+      }
+      if (coordinatesForUP$flag[n] == TRUE) {
+        break()
+      }
     }
-    
   }
   return (coordinatesForUP)
 }
 
 # функция для проверки LOS без учета максимального действия AP
 
-IsNotLOS <- function(i, HTx, coordinatesForUP, H) {
+IsNotLOS <- function(i, HTx, coordinatesForUP, HBlockage) {
   tgAlpha <- (HTx - coordinatesForUP$H[i])/coordinatesForUP$l[i]
   H_res <- tgAlpha*coordinatesForUP$l2[i] + coordinatesForUP$H[i]
-  if ( H_res > H ) {
+  if ( H_res > HBlockage ) {
     return(FALSE)
   }
   else {
@@ -163,12 +177,15 @@ IsNotLOS <- function(i, HTx, coordinatesForUP, H) {
 }
 
 # функция для проверки расстояние от AP До UP
-IsLOSWithoutBuilding <- function(i, HTx, coordinatesForUP, R) {
+IsLOSWithoutBuilding <- function(i, HTx, coordinatesForUP, R, APPoint) {
+  coordinatesForUP$l[i] <- DistBetweenPointsInMetres(coordinatesForUP$x[i], coordinatesForUP$y[i], APPoint$x, APPoint$y)
   d <- sqrt( (HTx - coordinatesForUP$H[i])^2 + (coordinatesForUP$l[i])^2 )
   if ( d > R) {
-    return(TRUE)
+    coordinatesForUP$flag[i] = TRUE
+    return(coordinatesForUP)
   }
   else {
-    return(FALSE)
+    coordinatesForUP$flag[i] = FALSE
+    return(coordinatesForUP)
   }
 }

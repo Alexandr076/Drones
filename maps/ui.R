@@ -10,18 +10,8 @@ shinyUI(
       sidebarPanel(
         numericInput ("n", 
           label = "Количество генерируемых точек UP", value = 1),
-        numericInput ("HTxMin", 
-          label = "Минимальная высота AP", value = 50),
-        numericInput ("HTxMax", 
-          label = "Максимальная высота AP", value = 51),
-        div(style = "display:inline-block; width:200px",
-          numericInput ("gridSizeX", 
-            label = "Размер сетки для моделирования {x,y}", value = 100)),
-        div(style = "display:inline-block; width:200px;", 
-          numericInput ("gridSizeY", 
-            "", value = 100)),
-        numericInput ("NumberOfIteration", 
-          label = "Количество итераций", value = 12),
+        numericInput ("HTx", 
+          label = "Высота AP", value = 50),
         div(style = "display:inline-block; width:110px",
           numericInput ("APPointX", 
             label = "Координаты AP", value = 50)),
@@ -36,11 +26,13 @@ shinyUI(
                     ".json")),
         numericInput ("R", 
           label = "Радиус действия AP", value = 100),
-        actionButton("Simulation", "Симуляция"),
-        actionButton("FigureOne", "График")
+        actionButton("Start", "Запись входных данных"),
+        actionButton("DataPropagation", "Разыграть координаты пользовательских устройств"),
+        actionButton("Simulation", "Симуляция")
       ),
       # Функция, определяющая структуру основного окна приложения:
       mainPanel (
+        h2(textOutput("TextOutput")),
         plotOutput("EndPlot", width = '900px', height = "900px")
       )
     )
